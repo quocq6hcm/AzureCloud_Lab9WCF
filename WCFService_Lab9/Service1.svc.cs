@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
+using WCFService_Lab9.Models;
 
 namespace WCFService_Lab9
 {
@@ -12,22 +13,32 @@ namespace WCFService_Lab9
     // NOTE: In order to launch WCF Test Client for testing this service, please select Service1.svc or Service1.svc.cs at the Solution Explorer and start debugging.
     public class Service1 : IService1
     {
-        public string GetData(int value)
+        Models.DVDContext _dbContext = new DVDContext();
+        Models.AccountContext _dbAccount = new AccountContext();
+
+
+        public List<Account> GetAccounts() => _dbAccount.Accounts.ToList();
+        
+
+        public List<DVD> GetByRange(string from, string to)
+            => _dbContext.DVDs
+            .Where(d => d.YearOfRelease.ToString().CompareTo(from) >= 0 && d.YearOfRelease.ToString().CompareTo(to) <= 0).ToList();
+        
+
+        public List<DVD> GetDVDs() => _dbContext.DVDs.ToList();
+
+        public void PostAccount(Account newAccount)
         {
-            return string.Format("You entered: {0}", value);
+            _dbAccount.Accounts.Add(newAccount);
+            _dbAccount.SaveChanges();
+            return;
         }
 
-        public CompositeType GetDataUsingDataContract(CompositeType composite)
+        public void PostDVD(DVD newDVD)
         {
-            if (composite == null)
-            {
-                throw new ArgumentNullException("composite");
-            }
-            if (composite.BoolValue)
-            {
-                composite.StringValue += "Suffix";
-            }
-            return composite;
+            _dbContext.DVDs.Add(newDVD);
+            _dbContext.SaveChanges();
+            return;
         }
     }
 }
